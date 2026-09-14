@@ -1,7 +1,9 @@
 import './review-dashboard.css';
+import './admin-navigation.css';
 import logoUrl from '../../alpha-zone-labs-logo.png?url';
 
 const app = document.querySelector('#app');
+const reportsUrl = 'https://sas.alphazonelabs.com/reports';
 
 async function api(path, options = {}) {
   const response = await fetch(path, { credentials: 'include', ...options });
@@ -97,6 +99,10 @@ function render(session) {
         <img src="${logoUrl}" alt="Alpha Zone Labs" />
         <span>Review Portal</span>
       </a>
+      <nav class="portal-nav" aria-label="Admin sections">
+        <a class="nav-button is-active" href="/dashboard.html">Reviews</a>
+        <a class="nav-button" href="${reportsUrl}">Reports</a>
+      </nav>
       <div class="portal-user">
         <span>${escapeHtml(session.email)}</span>
         <button id="sign-out" type="button" class="secondary-button">Sign out</button>
