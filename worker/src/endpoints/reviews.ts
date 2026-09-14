@@ -49,8 +49,15 @@ function media(c: AppContext): R2Bucket | null {
   return (c.env as ReviewEnv).REVIEWS_MEDIA || null;
 }
 
+const STATIC_REVIEW_ASSET_BASE = "https://raw.githubusercontent.com/hligon35/hldesignedit.com/main/";
+
 function imageUrl(key: string | null): string | null {
-  return key ? `/api/reviews/media/${encodeURIComponent(key)}` : null;
+  if (!key) return null;
+  if (key.startsWith("static/")) {
+    const assetPath = key.slice("static/".length).split("/").map((part) => encodeURIComponent(part)).join("/");
+    return `${STATIC_REVIEW_ASSET_BASE}${assetPath}`;
+  }
+  return `/api/reviews/media/${encodeURIComponent(key)}`;
 }
 
 function randomToken(): string {
@@ -345,7 +352,7 @@ export async function ReviewSubmit(c: AppContext) {
   const reviewId = crypto.randomUUID();
   let imageKey: string | null = null;
   if (image && media(c)) {
-    imageKey = `reviews/${reviewId}.${image.type.split("/")[1]}`;
+    imageKey = `reviewers/${reviewId}.${image.type.split("/")[1]}`;
     await media(c)?.put(imageKey, image.stream(), { httpMetadata: { contentType: image.type, cacheControl: "public, max-age=31536000, immutable" } });
   }
   await database.batch([
