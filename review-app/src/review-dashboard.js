@@ -31,8 +31,8 @@ function escapeHtml(value = '') {
 function reviewCard(review) {
   const stars = '★'.repeat(Number(review.rating || 0)) + '☆'.repeat(5 - Number(review.rating || 0));
   const pendingActions = review.status === 'pending'
-    ? `<div class="review-actions"><button class="approve" data-review-action="approve" data-review-id="${review.id}">Approve & post</button><button class="deny" data-review-action="reject" data-review-id="${review.id}">Reject</button></div>`
-    : '';
+    ? `<div class="review-actions"><button class="approve" data-review-action="approve" data-review-id="${review.id}">Approve & post</button><button class="deny" data-review-action="reject" data-review-id="${review.id}">Reject</button><button class="delete-review" data-review-action="delete" data-review-id="${review.id}">Delete</button></div>`
+    : `<div class="review-actions"><button class="delete-review" data-review-action="delete" data-review-id="${review.id}">Delete</button></div>`;
 
   return `
     <article class="review-item" data-review-card="${review.id}">
@@ -174,14 +174,20 @@ function render(session) {
   document.querySelector('#reviews-list').addEventListener('click', async (event) => {
     const button = event.target.closest('[data-review-action]');
     if (!button) return;
+    const action = button.dataset.reviewAction;
+    if (action === 'delete' && !window.confirm('Permanently delete this review? This cannot be undone.')) return;
     button.disabled = true;
     try {
-      await api(`/api/reviews/${button.dataset.reviewId}/moderate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: button.dataset.reviewAction }),
-      });
-      await refreshReviews();
+      if (action === 'delete') {
+        await api(`/api/reviews/${button.dataset.reviewId}`, { method: 'DELETE' });
+      } else {
+        await api(`/api/reviews/${button.dataset.reviewId}/moderate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action }),
+        });
+      }
+      await Promise.all([refreshReviews(), refreshAnalytics()]);
     } catch (error) {
       window.alert(error.message);
       button.disabled = false;
