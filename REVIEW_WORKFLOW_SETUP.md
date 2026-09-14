@@ -74,6 +74,7 @@ The main Alpha Zone Labs site must be rebuilt and deployed for approved reviews 
 - `POST /api/reviews/invitations` — authenticated invitation email
 - `GET /api/reviews` — authenticated moderation list
 - `POST /api/reviews/:id/moderate` — authenticated approve or deny
+- `DELETE /api/reviews/:id` — authenticated permanent review deletion
 - `GET /api/reviews/invitation/:token` — validate customer link
 - `POST /api/reviews/invitation/:token` — submit customer review
 - `GET /api/reviews/published` — public approved-review feed
