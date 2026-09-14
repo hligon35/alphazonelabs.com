@@ -92,11 +92,6 @@ const portfolioItems = [
   { type: 'systems', label: 'Organization website', title: 'Life Prep Academy Foundation', image: './projects/life_prep_academy_foundation.png', alt: 'Life Prep Academy Foundation website screenshot', problem: 'The organization needed its mission, programs, and next steps to be easier to understand.', changed: 'Improved page hierarchy, trust signals, and program access.', impact: 'A clearer digital home for families, supporters, and partners.', href: 'https://www.lifeprepacademyfoundation.com/' },
 ];
 
-const approvedReviews = [
-  // Add real approved reviews here. Only approved: true items display publicly.
-  // Example:
-  // { approved: true, rating: 5, review: 'Alpha Zone Labs made the process clear and helped us move forward with confidence.', reviewerFirstName: 'Jane', reviewerLastInitial: 'D' },
-];
 
 const pages = {
   home: {
