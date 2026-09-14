@@ -1,13 +1,14 @@
 import { z } from "zod";
 import type { AppContext } from "../types";
+import { sendEmail } from "../email";
 
 const MAX_FIELD_LENGTH = 10_000;
 
 const FormSubmitSchema = z.object({
 	formType: z.enum(["contact", "project"]),
-	data: z.record(z.string(), z.any()).default({}),
-	honeypot: z.string().optional().default(""),
-	pageUrl: z.string().url().optional(),
+	data: z.record(z.string(), z.unknown()).default({}),
+	honeypot: z.string().max(200).optional().default(""),
+	pageUrl: z.string().url().max(500).optional(),
 });
 
 function getAllowedOrigins(env: Env): string[] {
@@ -84,6 +85,10 @@ function pickFirstNonEmpty(data: Record<string, unknown>, keys: string[]): strin
 	return "";
 }
 
+function allowedOrigin(origin: string | null, env: Env): boolean {
+	return !!origin && getAllowedOrigins(env).includes(origin);
+}
+
 export async function FormsSubmit(c: AppContext) {
 	const origin = c.req.header("Origin") || null;
 	const cors = corsHeaders(origin, c.env);
@@ -91,6 +96,8 @@ export async function FormsSubmit(c: AppContext) {
 	if (c.req.method === "OPTIONS") {
 		return new Response(null, { status: 204, headers: cors });
 	}
+	if (!allowedOrigin(origin, c.env)) return c.json({ ok: false, error: "Request origin is not allowed." }, 403);
+	if (Number(c.req.header("Content-Length") || 0) > 64_000) return c.json({ ok: false, error: "Request is too large." }, 413, cors);
 
 	let parsed: z.infer<typeof FormSubmitSchema>;
 	try {
@@ -104,12 +111,8 @@ export async function FormsSubmit(c: AppContext) {
 		return c.json({ ok: true }, 200, { ...cors, "Content-Type": "application/json" });
 	}
 
-	const to = c.env.FORMS_TO_EMAIL || "info@alphazonelabs.com";
-	const from = c.env.FORMS_FROM_EMAIL || "noreply@alphazonelabs.com";
-
-	if (!c.env.EMAIL) {
-		return c.json({ ok: false, error: "Email service not configured." }, 500, { ...cors, "Content-Type": "application/json" });
-	}
+	const database = c.env.REVIEWS_DB;
+	if (!database) return c.json({ ok: false, error: "Form service is not configured." }, 503, cors);
 
 	const data = parsed.data || {};
 	const isProject = parsed.formType === "project";
@@ -123,6 +126,28 @@ export async function FormsSubmit(c: AppContext) {
 	const contactSubject = sanitizeField(pickFirstNonEmpty(data, ["subject", "topic"])).trim();
 	const message = sanitizeField(pickFirstNonEmpty(data, ["message"])).trim();
 	const details = sanitizeField(pickFirstNonEmpty(data, ["details", "projectDetails", "description", "message"])).trim();
+	if (name.length < 2 || email.length < 5 || !/^\S+@\S+\.\S+$/.test(email)) {
+		return c.json({ ok: false, error: "Please provide a valid name and email address." }, 400, cors);
+	}
+	if ((isProject && details.length < 10) || (!isProject && message.length < 2)) {
+		return c.json({ ok: false, error: "Please provide more detail about your request." }, 400, cors);
+	}
+
+	const now = new Date().toISOString();
+	const idempotencyKey = c.req.header("Idempotency-Key")?.trim() || crypto.randomUUID();
+	const submissionId = crypto.randomUUID();
+	const sourcePage = parsed.pageUrl || origin || "unknown";
+	try {
+		await database.prepare(
+			`INSERT INTO form_submissions
+			 (id, request_type, name, email, phone, company, project_details, status, source_page, created_at, updated_at, metadata_json, idempotency_key)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 'received', ?, ?, ?, ?, ?)`,
+		).bind(submissionId, parsed.formType, name, email, phone, company, details || message, sourcePage, now, now, JSON.stringify(data), idempotencyKey).run();
+	} catch (error) {
+		if (String(error).toLowerCase().includes("unique")) return c.json({ ok: true, duplicate: true }, 200, cors);
+		console.error("Form persistence failed", { submissionId });
+		return c.json({ ok: false, error: "We could not save your request." }, 503, cors);
+	}
 
 	const subject = isProject
 			? "New Project Request - Alpha Zone Labs"
@@ -200,9 +225,29 @@ export async function FormsSubmit(c: AppContext) {
 		</div>`;
 
 	try {
-		await c.env.EMAIL.send({ from, to, subject, text: lines.join("\n"), html, ...(replyTo ? { reply_to: replyTo } : {}) });
+		await sendEmail(c.env, {
+			to: c.env.FORMS_TO_EMAIL,
+			subject,
+			text: lines.join("\n"),
+			html,
+			replyTo,
+			idempotencyKey: `form-notification-${submissionId}`,
+		});
+		if (email) {
+			await sendEmail(c.env, {
+				to: email,
+				subject: "We received your request - Alpha Zone Labs",
+				text: `Hi ${name},\n\nWe received your request and will follow up soon.\n\nAlpha Zone Labs`,
+				idempotencyKey: `form-confirmation-${submissionId}`,
+			});
+		}
+		await database.prepare("UPDATE form_submissions SET notification_status = 'sent', confirmation_status = ?, status = 'processed', updated_at = ? WHERE id = ?")
+			.bind(email ? "sent" : "not_requested", new Date().toISOString(), submissionId).run();
 	} catch (error) {
-		return c.json({ ok: false, error: error instanceof Error ? error.message : "Failed to send." }, 502, { ...cors, "Content-Type": "application/json" });
+		console.error("Form email delivery failed", { submissionId });
+		await database.prepare("UPDATE form_submissions SET notification_status = 'failed', status = 'email_failed', updated_at = ? WHERE id = ?")
+			.bind(new Date().toISOString(), submissionId).run();
+		return c.json({ ok: false, error: "Your request was saved, but email delivery is temporarily unavailable." }, 502, cors);
 	}
 
 	return c.json({ ok: true }, 200, { ...cors, "Content-Type": "application/json" });

@@ -170,7 +170,7 @@ export async function ReviewCreateInvitation(c: AppContext) {
   const database = db(c);
   if (!database) return json(c, { error: "REVIEWS_DB is not configured." }, 503);
 
-  const body = await c.req.json<{ name?: string; email?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ name?: string; email?: string }>().catch(() => ({}) as { name?: string; email?: string });
   const customerName = clean(body.name, 120);
   const customerEmail = clean(body.email, 254).toLowerCase();
   if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
@@ -228,7 +228,7 @@ export async function ReviewModerate(c: AppContext) {
   if (!database) return json(c, { error: "REVIEWS_DB is not configured." }, 503);
 
   const id = c.req.param("id");
-  const body = await c.req.json<{ action?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ action?: string }>().catch(() => ({}) as { action?: string });
   const action = clean(body.action, 20).toLowerCase();
   const nextStatus = action === "approve" ? "approved" : action === "deny" ? "denied" : "";
   if (!nextStatus) return json(c, { error: "Action must be approve or deny." }, 400);
@@ -256,7 +256,7 @@ export async function ReviewSubmit(c: AppContext) {
   const database = db(c);
   if (!database) return json(c, { error: "Review service is not configured." }, 503);
   const token = clean(c.req.param("token"), 128);
-  const body = await c.req.json<{ name?: string; rating?: number; review?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ name?: string; rating?: number; review?: string }>().catch(() => ({}) as { name?: string; rating?: number; review?: string });
   const rating = Number(body.rating);
   const reviewText = clean(body.review, 3000);
   const submittedName = clean(body.name, 120);

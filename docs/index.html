@@ -10,36 +10,12 @@
     <meta name="author" content="Alpha Zone Labs" />
     <link rel="canonical" href="https://alphazonelabs.com/" />
     <link rel="sitemap" type="application/xml" href="https://alphazonelabs.com/sitemap.xml" />
-    <script type="module" crossorigin src="./assets/home-BukRvJmL.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/site-DGaqb7ik.js">
-    <link rel="stylesheet" crossorigin href="./assets/site-EmvkLpqf.css">
+    <script type="module" crossorigin src="./assets/home-CHSCtbPt.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/site-BMuVezp7.js">
+    <link rel="stylesheet" crossorigin href="./assets/site-BCippYNX.css">
     <link rel="stylesheet" crossorigin href="./assets/home-GcjL8hmm.css">
-    <style>
-      .reviews-section{background:linear-gradient(180deg,rgba(255,247,237,.78),rgba(255,255,255,.96));padding:5.5rem 1.25rem}.reviews-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1rem,2vw,1.4rem)}.review-card{min-height:100%;padding:clamp(1.25rem,2.5vw,1.75rem);border:1px solid rgba(231,229,228,.95);border-radius:1.75rem;background:rgba(255,255,255,.92);box-shadow:0 10px 30px rgba(28,25,23,.06);display:flex;flex-direction:column;gap:.9rem}.review-stars{color:#9a3412;font-size:1.1rem;letter-spacing:.08em;line-height:1}.review-card p{color:#404040;font-size:1rem;line-height:1.7}.review-card strong{margin-top:auto;color:#171717;font-weight:800}.review-card--empty{grid-column:1/-1;text-align:center;align-items:center;max-width:720px;margin:0 auto}@media(max-width:1100px){.reviews-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.reviews-section{padding:3.25rem 1rem}.reviews-grid{grid-template-columns:1fr}}
-    </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script>
-      (() => {
-        const approvedReviews = [];
-        const stars = (rating) => '★'.repeat(Math.max(1, Math.min(5, Number(rating) || 5))) + '☆'.repeat(5 - Math.max(1, Math.min(5, Number(rating) || 5)));
-        const card = (review) => `<article class="review-card"><div class="review-stars" aria-label="${review.rating || 5} out of 5 stars">${stars(review.rating)}</div><p>“${review.review}”</p><strong>${review.reviewerFirstName || 'Client'} ${review.reviewerLastInitial ? `${review.reviewerLastInitial}.` : ''}</strong></article>`;
-        const build = () => {
-          if (document.querySelector('.reviews-section')) return;
-          const workSection = document.querySelector('.work-showcase-section') || document.querySelector('.portfolio-section');
-          if (!workSection) return;
-          const visibleReviews = approvedReviews.filter((review) => review.approved);
-          const cards = visibleReviews.length ? visibleReviews.map(card).join('') : '<article class="review-card review-card--empty"><div class="review-stars" aria-label="No approved reviews yet">☆☆☆☆☆</div><p>Approved client reviews will appear here once they are added.</p><strong>Alpha Zone Labs</strong></article>';
-          const section = document.createElement('section');
-          section.className = 'reviews-section';
-          section.setAttribute('aria-labelledby','reviews-heading');
-          section.innerHTML = `<div class="section-header"><p class="eyebrow">Reviews</p><h2 id="reviews-heading">What clients say.</h2><p class="section-subtitle">Approved reviews display here with a star rating, the review, and the reviewer’s first name plus last initial.</p></div><div class="reviews-grid">${cards}</div>`;
-          workSection.insertAdjacentElement('afterend', section);
-        };
-        build();
-        new MutationObserver(build).observe(document.documentElement, { childList: true, subtree: true });
-      })();
-    </script>
+    <div id="app"></div>
   </body>
 </html>

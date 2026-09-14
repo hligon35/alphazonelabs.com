@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { FormsSubmit } from "./endpoints/formsSubmit";
+import { QuoteSubmit } from "./endpoints/quotes";
 import {
   ReviewAuthConfig,
   ReviewAuthLogout,
@@ -60,6 +61,7 @@ app.use("*", async (c, next) => {
 
 app.options("/api/forms", FormsSubmit);
 app.post("/api/forms", FormsSubmit);
+app.post("/api/quotes", QuoteSubmit);
 
 app.get("/api/auth/config", ReviewAuthConfig);
 app.post("/api/auth/google", ReviewGoogleLogin);

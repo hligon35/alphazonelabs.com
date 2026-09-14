@@ -235,7 +235,7 @@ function ctaPanel(title, copy, primaryHref, primaryLabel, secondaryHref, seconda
 }
 
 function contactForm() {
-  return `<form class="basic-contact-form"><label>Business or project name<input type="text" name="businessName" required></label><label>Your name<input type="text" name="name" required></label><label>Email<input type="email" name="email" required></label><label>What do you need help with?<select name="projectType" required><option value="">Choose one</option><option value="website">Website</option><option value="automation">Automation</option><option value="app">App or internal tool</option><option value="strategy">Strategy or system planning</option></select></label><label>What should work better?<textarea name="message" rows="6" required></textarea></label><button type="submit" class="cta-btn primary">Send Project Request</button><p class="form-status" aria-live="polite"></p></form>`;
+  return `<form class="basic-contact-form"><label>Business or project name<input type="text" name="businessName" maxlength="160" required></label><label>Your name<input type="text" name="name" maxlength="120" autocomplete="name" required></label><label>Email<input type="email" name="email" maxlength="254" autocomplete="email" required></label><label>What do you need help with?<select name="projectType" required><option value="">Choose one</option><option value="website">Website</option><option value="automation">Automation</option><option value="app">App or internal tool</option><option value="strategy">Strategy or system planning</option></select></label><label>What should work better?<textarea name="message" rows="6" maxlength="10000" required></textarea></label><label class="visually-hidden" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label><button type="submit" class="cta-btn primary">Send Project Request</button><p class="form-status" role="status" aria-live="polite"></p></form>`;
 }
 
 function initializeFeatures() {
@@ -312,11 +312,31 @@ function initializeFeatures() {
     const projectType = params.get('path');
     const typeField = contactFormElement.querySelector('[name="projectType"]');
     if (projectType && typeField) typeField.value = projectType;
-    contactFormElement.addEventListener('submit', (event) => {
+    contactFormElement.addEventListener('submit', async (event) => {
       event.preventDefault();
       const status = contactFormElement.querySelector('.form-status');
-      status.textContent = 'Thanks. Your request has been received.';
-      contactFormElement.reset();
+      const button = contactFormElement.querySelector('button[type="submit"]');
+      const data = Object.fromEntries(new FormData(contactFormElement));
+      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8787/api/forms'
+        : '/api/forms';
+      button.disabled = true;
+      status.textContent = 'Sending your request...';
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
+          body: JSON.stringify({ formType: 'project', data, honeypot: data.website, pageUrl: window.location.href })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || 'We could not send your request.');
+        status.textContent = payload.duplicate ? 'This request was already received.' : 'Thanks. Your request has been received.';
+        contactFormElement.reset();
+      } catch (submissionError) {
+        status.textContent = submissionError instanceof Error ? submissionError.message : 'We could not send your request.';
+      } finally {
+        button.disabled = false;
+      }
     });
   }
 }
