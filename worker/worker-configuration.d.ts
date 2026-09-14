@@ -3,6 +3,7 @@
 // Runtime types generated with workerd@1.20260701.1 2026-01-28 
 interface __BaseEnv_Env {
     REVIEWS_DB: D1Database;
+    REVIEWS_MEDIA: R2Bucket;
     RESEND_API_KEY: string;
     RESEND_FROM_EMAIL: string;
     RESEND_FROM_NAME: string;

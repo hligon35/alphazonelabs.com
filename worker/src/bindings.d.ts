@@ -1,6 +1,7 @@
 declare global {
 	interface Env {
 		REVIEWS_DB: D1Database;
+		REVIEWS_MEDIA?: R2Bucket;
 		RESEND_API_KEY?: string;
 		RESEND_FROM_EMAIL?: string;
 		RESEND_FROM_NAME?: string;

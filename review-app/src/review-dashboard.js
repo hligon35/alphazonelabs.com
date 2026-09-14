@@ -31,12 +31,13 @@ function escapeHtml(value = '') {
 function reviewCard(review) {
   const stars = '★'.repeat(Number(review.rating || 0)) + '☆'.repeat(5 - Number(review.rating || 0));
   const pendingActions = review.status === 'pending'
-    ? `<div class="review-actions"><button class="approve" data-review-action="approve" data-review-id="${review.id}">Approve & post</button><button class="deny" data-review-action="deny" data-review-id="${review.id}">Deny</button></div>`
+    ? `<div class="review-actions"><button class="approve" data-review-action="approve" data-review-id="${review.id}">Approve & post</button><button class="deny" data-review-action="reject" data-review-id="${review.id}">Reject</button></div>`
     : '';
 
   return `
     <article class="review-item" data-review-card="${review.id}">
       <div class="review-item__top">
+        ${review.image_url ? `<img class="reviewer-image" src="${escapeHtml(review.image_url)}" alt="" loading="lazy">` : ''}
         <div>
           <h3>${escapeHtml(review.customer_name || 'Customer')}</h3>
           <p>${escapeHtml(review.customer_email)}</p>
@@ -49,6 +50,30 @@ function reviewCard(review) {
       ${pendingActions}
     </article>
   `;
+}
+
+async function refreshAnalytics() {
+  const host = document.querySelector('#analytics-content');
+  try {
+    const payload = await api('/api/reviews/analytics');
+    const summary = payload.summary || {};
+    const ratings = payload.ratings || [];
+    const invitations = payload.invitations || [];
+    const ratingMap = Object.fromEntries(ratings.map((item) => [item.rating, item.count]));
+    host.innerHTML = `
+      <div class="metric-grid">
+        <div class="metric"><span>Total reviews</span><strong>${summary.total || 0}</strong></div>
+        <div class="metric"><span>Pending</span><strong>${summary.pending || 0}</strong></div>
+        <div class="metric"><span>Published</span><strong>${summary.approved || 0}</strong></div>
+        <div class="metric"><span>Average rating</span><strong>${summary.average_rating || '—'} / 5</strong></div>
+      </div>
+      <div class="analytics-columns">
+        <div><h3>Published ratings</h3>${[5, 4, 3, 2, 1].map((rating) => `<div class="bar-row"><span>${rating} stars</span><div class="bar"><i style="width:${Math.min(100, Number(ratingMap[rating] || 0) * 12)}%"></i></div><b>${ratingMap[rating] || 0}</b></div>`).join('')}</div>
+        <div><h3>Invitation status</h3><ul class="status-list">${invitations.length ? invitations.map((item) => `<li><span>${escapeHtml(item.status)}</span><b>${item.count}</b></li>`).join('') : '<li><span>No invitations yet</span><b>0</b></li>'}</ul></div>
+      </div>`;
+  } catch (error) {
+    host.innerHTML = `<p class="form-status error">${escapeHtml(error.message)}</p>`;
+  }
 }
 
 async function refreshReviews() {
@@ -106,6 +131,10 @@ function render(session) {
           <div id="reviews-list" class="reviews-list"></div>
         </article>
       </section>
+      <section class="dashboard-card analytics-card">
+        <div class="card-heading"><div><p class="eyebrow">Analytics</p><h2>Review performance</h2></div><button id="refresh-analytics" type="button" class="secondary-button">Refresh analytics</button></div>
+        <div id="analytics-content"><p class="muted">Loading analytics…</p></div>
+      </section>
     </main>
   `;
 
@@ -141,6 +170,7 @@ function render(session) {
   });
 
   document.querySelector('#refresh-reviews').addEventListener('click', refreshReviews);
+  document.querySelector('#refresh-analytics').addEventListener('click', refreshAnalytics);
   document.querySelector('#reviews-list').addEventListener('click', async (event) => {
     const button = event.target.closest('[data-review-action]');
     if (!button) return;
@@ -159,6 +189,7 @@ function render(session) {
   });
 
   refreshReviews();
+  refreshAnalytics();
 }
 
 loadSession().then((session) => {

@@ -39,6 +39,12 @@
 - Local admin login smoke test returned `200` with an auth cookie.
 - Production review page and auth configuration returned `200`.
 - Production Resend API key is still not configured; email-backed workflows remain blocked until it is added.
+- Added authenticated review analytics with totals, pending/approved/rejected counts, average rating, rating distribution, and invitation status.
+- Added approve/reject controls and audit records to the admin moderation flow.
+- Created the `azl-review-media` R2 bucket and deployed reviewer logo/headshot upload and delivery.
+- Added the requested reviewer identity row above the review text on public cards.
+- Applied `0003_review_media.sql` and verified all review/application tables exist in production D1.
+- Verified unauthenticated analytics requests return `401` and public review delivery returns `200`.
 
 ## Required dashboard actions
 

@@ -1,72 +1,90 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "azl-review",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-01-28",
-  "workers_dev": true,
-  "observability": {
-    "enabled": true
-  },
-
-  "d1_databases": [
-    {
-      "binding": "REVIEWS_DB",
-      "database_name": "azl-reviews",
-      "database_id": "b02d7c1f-de2a-4038-9147-5126ad6cbc5e"
-    }
-  ],
-
-  "vars": {
-    "GOOGLE_CLIENT_ID": "163925102971-unugq0eks4833r9t268tmo09ld1ooii9.apps.googleusercontent.com",
-    "ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com, hligon35@gmail.com, hligon@alphazonelabs.com, alphazonelabsllc@gmail.com",
-    "RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
-    "RESEND_FROM_NAME": "Alpha Zone Labs",
-    "REVIEW_SITE_URL": "https://review.alphazonelabs.com",
-    "FORMS_TO_EMAIL": "info@alphazonelabs.com",
-    "FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
-    "ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com,http://localhost:5173,http://127.0.0.1:5173,https://hligon35.github.io"
-  },
-
-  "env": {
-    "production": {
-      "name": "azl-review",
-      "d1_databases": [
-        {
-          "binding": "REVIEWS_DB",
-          "database_name": "azl-reviews",
-          "database_id": "b02d7c1f-de2a-4038-9147-5126ad6cbc5e"
-        }
-      ],
-      "routes": [
-        { "pattern": "alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" },
-        { "pattern": "www.alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" },
-        { "pattern": "review.alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" }
-      ],
-      "vars": {
-        "ENVIRONMENT": "production",
-        "GOOGLE_CLIENT_ID": "163925102971-unugq0eks4833r9t268tmo09ld1ooi9.apps.googleusercontent.com",
-        "ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com,hligon35@gmail.com,hligon@alphazonelabs.com,alphazonelabsllc@gmail.com",
-        "RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
-        "RESEND_FROM_NAME": "Alpha Zone Labs",
-        "REVIEW_SITE_URL": "https://review.alphazonelabs.com",
-        "FORMS_TO_EMAIL": "info@alphazonelabs.com",
-        "FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
-        "ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com"
-      }
-    },
-    "preview": {
-      "workers_dev": true,
-      "vars": {
-        "ENVIRONMENT": "preview"
-      }
-    },
-    "development": {
-      "workers_dev": true,
-      "vars": {
-        "ENVIRONMENT": "development",
-        "LOCAL_AUTH_BYPASS": "true",
-        "LOCAL_ADMIN_EMAIL": "local-admin@example.com"
-      }
-    }
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "azl-review",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-01-28",
+	"workers_dev": true,
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "REVIEWS_DB",
+			"database_name": "azl-reviews",
+			"database_id": "b02d7c1f-de2a-4038-9147-5126ad6cbc5e"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "REVIEWS_MEDIA",
+			"bucket_name": "azl-review-media"
+		},
+	],
+	"vars": {
+		"GOOGLE_CLIENT_ID": "163925102971-unugq0eks4833r9t268tmo09ld1ooii9.apps.googleusercontent.com",
+		"ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com, hligon35@gmail.com, hligon@alphazonelabs.com, alphazonelabsllc@gmail.com",
+		"RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
+		"RESEND_FROM_NAME": "Alpha Zone Labs",
+		"REVIEW_SITE_URL": "https://review.alphazonelabs.com",
+		"FORMS_TO_EMAIL": "info@alphazonelabs.com",
+		"FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
+		"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com,http://localhost:5173,http://127.0.0.1:5173,https://hligon35.github.io"
+	},
+	"env": {
+		"production": {
+			"name": "azl-review",
+			"d1_databases": [
+				{
+					"binding": "REVIEWS_DB",
+					"database_name": "azl-reviews",
+					"database_id": "b02d7c1f-de2a-4038-9147-5126ad6cbc5e"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "REVIEWS_MEDIA",
+					"bucket_name": "azl-review-media"
+				}
+			],
+			"routes": [
+				{
+					"pattern": "alphazonelabs.com/api/*",
+					"zone_name": "alphazonelabs.com"
+				},
+				{
+					"pattern": "www.alphazonelabs.com/api/*",
+					"zone_name": "alphazonelabs.com"
+				},
+				{
+					"pattern": "review.alphazonelabs.com/api/*",
+					"zone_name": "alphazonelabs.com"
+				}
+			],
+			"vars": {
+				"ENVIRONMENT": "production",
+				"GOOGLE_CLIENT_ID": "163925102971-unugq0eks4833r9t268tmo09ld1ooi9.apps.googleusercontent.com",
+				"ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com,hligon35@gmail.com,hligon@alphazonelabs.com,alphazonelabsllc@gmail.com",
+				"RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
+				"RESEND_FROM_NAME": "Alpha Zone Labs",
+				"REVIEW_SITE_URL": "https://review.alphazonelabs.com",
+				"FORMS_TO_EMAIL": "info@alphazonelabs.com",
+				"FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
+				"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com"
+			}
+		},
+		"preview": {
+			"workers_dev": true,
+			"vars": {
+				"ENVIRONMENT": "preview"
+			}
+		},
+		"development": {
+			"workers_dev": true,
+			"vars": {
+				"ENVIRONMENT": "development",
+				"LOCAL_AUTH_BYPASS": "true",
+				"LOCAL_ADMIN_EMAIL": "local-admin@example.com"
+			}
+		}
+	}
 }

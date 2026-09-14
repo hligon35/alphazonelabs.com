@@ -3,6 +3,7 @@ import { getAuthorizedReviewSession } from "./reviewAuth";
 
 type ReviewEnv = Env & {
   REVIEWS_DB?: D1Database;
+  REVIEWS_MEDIA?: R2Bucket;
   SENDGRID_API_KEY?: string;
   REVIEW_FROM_EMAIL?: string;
   REVIEW_SITE_URL?: string;
@@ -32,6 +33,8 @@ type ReviewRow = {
   created_at: string;
   moderated_at: string | null;
   moderated_by: string | null;
+  image_key: string | null;
+  image_content_type: string | null;
 };
 
 function json(c: AppContext, body: unknown, status = 200, headers: Record<string, string> = {}) {
@@ -40,6 +43,14 @@ function json(c: AppContext, body: unknown, status = 200, headers: Record<string
 
 function db(c: AppContext): D1Database | null {
   return (c.env as ReviewEnv).REVIEWS_DB || null;
+}
+
+function media(c: AppContext): R2Bucket | null {
+  return (c.env as ReviewEnv).REVIEWS_MEDIA || null;
+}
+
+function imageUrl(key: string | null): string | null {
+  return key ? `/api/reviews/media/${encodeURIComponent(key)}` : null;
 }
 
 function randomToken(): string {
@@ -214,11 +225,24 @@ export async function ReviewListAdmin(c: AppContext) {
   if (!database) return json(c, { error: "REVIEWS_DB is not configured." }, 503);
 
   const results = await database.prepare(
-    `SELECT r.id, r.invitation_id, r.customer_name, r.customer_email, r.rating, r.review_text,
-            r.status, r.created_at, r.moderated_at, r.moderated_by
+        `SELECT r.id, r.invitation_id, r.customer_name, r.customer_email, r.rating, r.review_text,
+          r.status, r.created_at, r.moderated_at, r.moderated_by, r.image_key, r.image_content_type
      FROM reviews r ORDER BY r.created_at DESC LIMIT 200`,
   ).all<ReviewRow>();
-  return json(c, { reviews: results.results || [] });
+  return json(c, { reviews: (results.results || []).map((review) => ({ ...review, image_url: imageUrl(review.image_key) })) });
+}
+
+export async function ReviewAnalytics(c: AppContext) {
+  const auth = await requireAdmin(c);
+  if (auth.response) return auth.response;
+  const database = db(c);
+  if (!database) return json(c, { error: "REVIEWS_DB is not configured." }, 503);
+  const [summary, ratings, invitations] = await Promise.all([
+    database.prepare("SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending, SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved, SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected, ROUND(AVG(CASE WHEN status = 'approved' THEN rating END), 2) AS average_rating FROM reviews").first<Record<string, number>>(),
+    database.prepare("SELECT rating, COUNT(*) AS count FROM reviews WHERE status = 'approved' GROUP BY rating ORDER BY rating").all<{ rating: number; count: number }>(),
+    database.prepare("SELECT status, COUNT(*) AS count FROM review_invitations GROUP BY status ORDER BY status").all<{ status: string; count: number }>(),
+  ]);
+  return json(c, { summary: summary || {}, ratings: ratings.results || [], invitations: invitations.results || [] });
 }
 
 export async function ReviewModerate(c: AppContext) {
@@ -230,13 +254,15 @@ export async function ReviewModerate(c: AppContext) {
   const id = c.req.param("id");
   const body = await c.req.json<{ action?: string }>().catch(() => ({}) as { action?: string });
   const action = clean(body.action, 20).toLowerCase();
-  const nextStatus = action === "approve" ? "approved" : action === "deny" ? "denied" : "";
-  if (!nextStatus) return json(c, { error: "Action must be approve or deny." }, 400);
+  const nextStatus = action === "approve" ? "approved" : action === "reject" ? "rejected" : "";
+  if (!nextStatus) return json(c, { error: "Action must be approve or reject." }, 400);
 
   const result = await database.prepare(
     "UPDATE reviews SET status = ?, moderated_at = ?, moderated_by = ? WHERE id = ?",
   ).bind(nextStatus, new Date().toISOString(), auth.session.email, id).run();
   if (!result.meta.changes) return json(c, { error: "Review not found." }, 404);
+  await database.prepare("INSERT INTO review_audit_log (id, actor_email, action, entity_type, entity_id, created_at) VALUES (?, ?, ?, 'review', ?, ?)")
+    .bind(crypto.randomUUID(), auth.session.email, nextStatus, id, new Date().toISOString()).run();
   return json(c, { ok: true, id, status: nextStatus });
 }
 
@@ -256,12 +282,27 @@ export async function ReviewSubmit(c: AppContext) {
   const database = db(c);
   if (!database) return json(c, { error: "Review service is not configured." }, 503);
   const token = clean(c.req.param("token"), 128);
-  const body = await c.req.json<{ name?: string; rating?: number; review?: string }>().catch(() => ({}) as { name?: string; rating?: number; review?: string });
-  const rating = Number(body.rating);
-  const reviewText = clean(body.review, 3000);
-  const submittedName = clean(body.name, 120);
+  const contentType = c.req.header("Content-Type") || "";
+  let submittedName = "";
+  let rating = 0;
+  let reviewText = "";
+  let image: File | null = null;
+  if (contentType.includes("multipart/form-data")) {
+    const form = await c.req.raw.formData();
+    submittedName = clean(form.get("name"), 120);
+    rating = Number(form.get("rating"));
+    reviewText = clean(form.get("review"), 3000);
+    const candidate = form.get("image");
+    image = candidate instanceof File && candidate.size > 0 ? candidate : null;
+  } else {
+    const body = await c.req.json<{ name?: string; rating?: number; review?: string }>().catch(() => ({}) as { name?: string; rating?: number; review?: string });
+    rating = Number(body.rating);
+    reviewText = clean(body.review, 3000);
+    submittedName = clean(body.name, 120);
+  }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) return json(c, { error: "Select a rating from 1 to 5." }, 400);
   if (reviewText.length < 10) return json(c, { error: "Please provide at least 10 characters of feedback." }, 400);
+  if (image && (!media(c) || image.size > 2_000_000 || !["image/jpeg", "image/png", "image/webp"].includes(image.type))) return json(c, { error: "Image must be a JPG, PNG, or WebP file under 2 MB." }, 400);
 
   const invitation = await database.prepare(
     "SELECT id, customer_name, customer_email, status FROM review_invitations WHERE token = ?",
@@ -271,11 +312,16 @@ export async function ReviewSubmit(c: AppContext) {
 
   const now = new Date().toISOString();
   const reviewId = crypto.randomUUID();
+  let imageKey: string | null = null;
+  if (image && media(c)) {
+    imageKey = `reviews/${reviewId}.${image.type.split("/")[1]}`;
+    await media(c)?.put(imageKey, image.stream(), { httpMetadata: { contentType: image.type, cacheControl: "public, max-age=31536000, immutable" } });
+  }
   await database.batch([
     database.prepare(
-      `INSERT INTO reviews (id, invitation_id, customer_name, customer_email, rating, review_text, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
-    ).bind(reviewId, invitation.id, submittedName || invitation.customer_name, invitation.customer_email, rating, reviewText, now),
+      `INSERT INTO reviews (id, invitation_id, customer_name, customer_email, rating, review_text, status, created_at, image_key, image_content_type)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
+    ).bind(reviewId, invitation.id, submittedName || invitation.customer_name, invitation.customer_email, rating, reviewText, now, imageKey, image?.type || null),
     database.prepare("UPDATE review_invitations SET status = 'submitted', submitted_at = ? WHERE id = ?").bind(now, invitation.id),
   ]);
   return json(c, { ok: true, message: "Thank you. Your review was submitted for approval." }, 201);
@@ -285,8 +331,17 @@ export async function ReviewListPublished(c: AppContext) {
   const database = db(c);
   if (!database) return json(c, { reviews: [] }, 200, publicHeaders(c));
   const results = await database.prepare(
-    `SELECT id, customer_name, rating, review_text, created_at
+    `SELECT id, customer_name, rating, review_text, created_at, image_key
      FROM reviews WHERE status = 'approved' ORDER BY moderated_at DESC, created_at DESC LIMIT 12`,
-  ).all<{ id: string; customer_name: string; rating: number; review_text: string; created_at: string }>();
-  return json(c, { reviews: results.results || [] }, 200, publicHeaders(c));
+  ).all<{ id: string; customer_name: string; rating: number; review_text: string; created_at: string; image_key: string | null }>();
+  return json(c, { reviews: (results.results || []).map((review) => ({ ...review, image_url: imageUrl(review.image_key) })) }, 200, publicHeaders(c));
+}
+
+export async function ReviewMedia(c: AppContext) {
+  const bucket = media(c);
+  if (!bucket) return new Response("Not found", { status: 404 });
+  const key = decodeURIComponent(c.req.param("key"));
+  const object = await bucket.get(key);
+  if (!object) return new Response("Not found", { status: 404 });
+  return new Response(object.body, { headers: { "Content-Type": object.httpMetadata?.contentType || "application/octet-stream", "Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff" } });
 }

@@ -11,11 +11,13 @@ import {
 import {
   ReviewCreateInvitation,
   ReviewGetInvitation,
+  ReviewAnalytics,
   ReviewListAdmin,
   ReviewListPublished,
   ReviewModerate,
   ReviewPublicOptions,
   ReviewSubmit,
+  ReviewMedia,
 } from "./endpoints/reviews";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -72,7 +74,9 @@ app.post("/api/auth/logout", ReviewAuthLogout);
 
 app.post("/api/reviews/invitations", ReviewCreateInvitation);
 app.get("/api/reviews", ReviewListAdmin);
+app.get("/api/reviews/analytics", ReviewAnalytics);
 app.post("/api/reviews/:id/moderate", ReviewModerate);
+app.get("/api/reviews/media/:key{.+}", ReviewMedia);
 app.get("/api/reviews/invitation/:token", ReviewGetInvitation);
 app.post("/api/reviews/invitation/:token", ReviewSubmit);
 app.options("/api/reviews/published", ReviewPublicOptions);
