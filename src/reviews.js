@@ -13,9 +13,9 @@ function reviewCard(review) {
   const rating = Math.max(1, Math.min(5, Number(review.rating || 5)));
   return `
     <article class="published-review-card">
+      <div class="published-review-card__identity">${review.image_url ? `<img src="${escapeHtml(review.image_url)}" alt="" loading="lazy">` : '<span class="published-review-card__avatar" aria-hidden="true"></span>'}<strong>${escapeHtml(review.customer_name || 'Alpha Zone Labs customer')}</strong></div>
       <p class="published-review-stars" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</p>
       <blockquote>“${escapeHtml(review.review_text)}”</blockquote>
-      <p class="published-review-name">${escapeHtml(review.customer_name || 'Alpha Zone Labs customer')}</p>
     </article>
   `;
 }

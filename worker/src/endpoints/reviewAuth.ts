@@ -4,6 +4,9 @@ type ReviewAuthEnv = Env & {
   GOOGLE_CLIENT_ID?: string;
   ALLOWED_GOOGLE_EMAILS?: string;
   AUTH_COOKIE_SECRET?: string;
+  ENVIRONMENT?: string;
+  LOCAL_AUTH_BYPASS?: string;
+  LOCAL_ADMIN_EMAIL?: string;
 };
 
 export type ReviewSession = {
@@ -83,13 +86,38 @@ function allowedEmails(env: ReviewAuthEnv): Set<string> {
   );
 }
 
+function isLocalDevelopment(c: AppContext, env: ReviewAuthEnv): boolean {
+  const requestHost = `${c.req.url} ${c.req.header("Host") || ""}`;
+  const localHost = /(?:localhost|127\.0\.0\.1)(?::\d+)?(?:\/|\s|$)/i.test(requestHost);
+  return env.ENVIRONMENT !== "production" && localHost;
+}
+
+function sessionCookie(c: AppContext, token: string, maxAge: number): string {
+  const secure = new URL(c.req.url).protocol === "https:" ? "; Secure" : "";
+  return `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=${maxAge}`;
+}
+
 export async function getAuthorizedReviewSession(c: AppContext): Promise<ReviewSession | null> {
   const env = c.env as ReviewAuthEnv;
+  if (isLocalDevelopment(c, env)) {
+    return { email: (env.LOCAL_ADMIN_EMAIL || "local-admin@example.com").toLowerCase(), name: "Local administrator", exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS };
+  }
   if (!env.AUTH_COOKIE_SECRET) return null;
   const token = getCookie(c.req.raw, COOKIE_NAME);
   const session = token ? await readSession(token, env.AUTH_COOKIE_SECRET) : null;
   if (!session || !allowedEmails(env).has(session.email.toLowerCase())) return null;
   return session;
+}
+
+export async function ReviewLocalDevLogin(c: AppContext) {
+  const env = c.env as ReviewAuthEnv;
+  if (!isLocalDevelopment(c, env)) return json(c, { error: "Local development authentication is disabled." }, 403);
+  const secret = env.AUTH_COOKIE_SECRET || "local-development-only-cookie-secret";
+  const token = await createSession(
+    { email: (env.LOCAL_ADMIN_EMAIL || "local-admin@example.com").toLowerCase(), name: "Local administrator", exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS },
+    secret,
+  );
+  return json(c, { ok: true }, 200, { "Set-Cookie": sessionCookie(c, token, SESSION_SECONDS) });
 }
 
 export async function ReviewAuthConfig(c: AppContext) {
@@ -139,8 +167,7 @@ export async function ReviewGoogleLogin(c: AppContext) {
     env.AUTH_COOKIE_SECRET,
   );
 
-  const cookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_SECONDS}`;
-  return json(c, { ok: true, email }, 200, { "Set-Cookie": cookie });
+  return json(c, { ok: true, email }, 200, { "Set-Cookie": sessionCookie(c, token, SESSION_SECONDS) });
 }
 
 export async function ReviewAuthSession(c: AppContext) {
@@ -152,6 +179,7 @@ export async function ReviewAuthSession(c: AppContext) {
 }
 
 export async function ReviewAuthLogout(c: AppContext) {
-  const cookie = `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+  const secure = new URL(c.req.url).protocol === "https:" ? "; Secure" : "";
+  const cookie = `${COOKIE_NAME}=; Path=/; HttpOnly${secure}; SameSite=Lax; Max-Age=0`;
   return json(c, { ok: true }, 200, { "Set-Cookie": cookie });
 }

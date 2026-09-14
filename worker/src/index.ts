@@ -1,19 +1,23 @@
 import { Hono } from "hono";
 import { FormsSubmit } from "./endpoints/formsSubmit";
+import { QuoteSubmit } from "./endpoints/quotes";
 import {
   ReviewAuthConfig,
   ReviewAuthLogout,
+  ReviewLocalDevLogin,
   ReviewAuthSession,
   ReviewGoogleLogin,
 } from "./endpoints/reviewAuth";
 import {
   ReviewCreateInvitation,
   ReviewGetInvitation,
+  ReviewAnalytics,
   ReviewListAdmin,
   ReviewListPublished,
   ReviewModerate,
   ReviewPublicOptions,
   ReviewSubmit,
+  ReviewMedia,
 } from "./endpoints/reviews";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -60,19 +64,26 @@ app.use("*", async (c, next) => {
 
 app.options("/api/forms", FormsSubmit);
 app.post("/api/forms", FormsSubmit);
+app.post("/api/quotes", QuoteSubmit);
 
 app.get("/api/auth/config", ReviewAuthConfig);
 app.post("/api/auth/google", ReviewGoogleLogin);
+app.post("/api/auth/local-dev", ReviewLocalDevLogin);
 app.get("/api/auth/session", ReviewAuthSession);
 app.post("/api/auth/logout", ReviewAuthLogout);
 
 app.post("/api/reviews/invitations", ReviewCreateInvitation);
 app.get("/api/reviews", ReviewListAdmin);
+app.get("/api/reviews/analytics", ReviewAnalytics);
 app.post("/api/reviews/:id/moderate", ReviewModerate);
+app.get("/api/reviews/media/:key{.+}", ReviewMedia);
 app.get("/api/reviews/invitation/:token", ReviewGetInvitation);
 app.post("/api/reviews/invitation/:token", ReviewSubmit);
 app.options("/api/reviews/published", ReviewPublicOptions);
 app.get("/api/reviews/published", ReviewListPublished);
+
+app.get("/admin", (c) => c.redirect("https://review.alphazonelabs.com/"));
+app.get("/admin/*", (c) => c.redirect("https://review.alphazonelabs.com/"));
 
 app.get("/", (c) => c.json({ ok: true, service: "Alpha Zone Labs forms and review authentication" }));
 

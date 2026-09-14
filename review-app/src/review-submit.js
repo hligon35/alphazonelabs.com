@@ -102,6 +102,9 @@ function renderForm(invitation) {
         <form id="review-form">
           <label for="reviewer-name">Name displayed with review</label>
           <input id="reviewer-name" name="name" type="text" maxlength="120" value="${escapeHtml(invitation.name || '')}" required>
+          <label for="reviewer-image">Logo or headshot (optional)</label>
+          <input id="reviewer-image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+          <p class="field-help">Use a JPG, PNG, or WebP image under 2 MB.</p>
           <fieldset>
             <legend>Overall rating</legend>
             <div id="rating-selector" class="rating-selector" role="radiogroup" aria-label="Overall rating">
@@ -135,8 +138,8 @@ function renderForm(invitation) {
       return;
     }
 
-    const data = Object.fromEntries(new FormData(form));
-    data.rating = Number(data.rating);
+    const data = new FormData(form);
+    data.set('rating', String(Number(data.get('rating'))));
     button.disabled = true;
     status.className = 'form-status';
     status.textContent = 'Submitting your review…';
@@ -144,8 +147,7 @@ function renderForm(invitation) {
     try {
       const result = await api(`/api/reviews/invitation/${encodeURIComponent(token)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: data,
       });
       form.innerHTML = `<div class="success-panel"><p class="eyebrow">Submitted</p><h2>Thank you for your feedback.</h2><p>${escapeHtml(result.message)}</p></div>`;
     } catch (error) {

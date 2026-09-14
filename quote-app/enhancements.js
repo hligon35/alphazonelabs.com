@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const SCRIPT_HOST = 'script.google.com';
   const originalSubmit = HTMLFormElement.prototype.submit;
   let submissionInProgress = false;
 
@@ -11,7 +10,7 @@
 
   HTMLFormElement.prototype.submit = function patchedSubmit() {
     const actionUrl = new URL(this.action, window.location.href);
-    const isQuoteSubmission = actionUrl.hostname === SCRIPT_HOST && this.target === 'quoteSubmissionFrame';
+    const isQuoteSubmission = actionUrl.pathname === '/api/quotes' && this.target === 'quoteSubmissionFrame';
 
     if (!isQuoteSubmission) {
       return originalSubmit.call(this);
@@ -23,11 +22,12 @@
     const form = this;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 30000);
-    const body = new URLSearchParams(new FormData(form));
+    const rawPayload = new URLSearchParams(new FormData(form)).get('payload');
+    const body = JSON.stringify(rawPayload ? JSON.parse(rawPayload) : {});
 
     fetch(actionUrl.href, {
       method: 'POST',
-      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
       body,
       signal: controller.signal,
       keepalive: true

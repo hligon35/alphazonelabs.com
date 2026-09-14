@@ -22,6 +22,7 @@ app.innerHTML = `
           <h2>Sign in</h2>
           <p class="signin-intro">Use a Google account that has been added to the portal allowlist.</p>
           <div id="google-signin" class="google-signin" aria-live="polite"></div>
+          <button id="local-dev-login" type="button" hidden>Use local development login</button>
           <p id="auth-status" class="auth-status" role="status"></p>
         </div>
       </div>
@@ -31,6 +32,7 @@ app.innerHTML = `
 
 const statusElement = document.querySelector('#auth-status');
 const buttonHost = document.querySelector('#google-signin');
+const localLoginButton = document.querySelector('#local-dev-login');
 
 function setStatus(message, type = '') {
   statusElement.textContent = message;
@@ -81,6 +83,22 @@ async function handleCredential(response) {
 }
 
 async function initializeGoogleSignIn() {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isLocal) {
+    localLoginButton.hidden = false;
+    localLoginButton.addEventListener('click', async () => {
+      localLoginButton.disabled = true;
+      try {
+        const response = await fetch('/api/auth/local-dev', { method: 'POST', credentials: 'include' });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || 'Local authentication is disabled.');
+        window.location.assign('/dashboard.html');
+      } catch (error) {
+        localLoginButton.disabled = false;
+        setStatus(error instanceof Error ? error.message : 'Unable to use local authentication.', 'error');
+      }
+    });
+  }
   try {
     const configResponse = await fetch('/api/auth/config', { credentials: 'include' });
     const config = await configResponse.json().catch(() => ({}));

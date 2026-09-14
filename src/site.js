@@ -7,6 +7,9 @@ const brand = {
 };
 
 const quoteUrl = 'https://quote.alphazonelabs.com/';
+const reviewUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5175/'
+  : 'https://review.alphazonelabs.com/';
 
 const pagePaths = {
   home: './index.html',
@@ -25,6 +28,7 @@ const navigation = [
   { key: 'about', label: 'About', href: pagePaths.about },
   { key: 'portfolio', label: 'Work', href: pagePaths.portfolio },
   { key: 'services', label: 'Services', href: pagePaths.services },
+  { key: 'review', label: 'Admin', href: reviewUrl },
 ];
 
 const contactRoutes = {
@@ -88,11 +92,6 @@ const portfolioItems = [
   { type: 'systems', label: 'Organization website', title: 'Life Prep Academy Foundation', image: './projects/life_prep_academy_foundation.png', alt: 'Life Prep Academy Foundation website screenshot', problem: 'The organization needed its mission, programs, and next steps to be easier to understand.', changed: 'Improved page hierarchy, trust signals, and program access.', impact: 'A clearer digital home for families, supporters, and partners.', href: 'https://www.lifeprepacademyfoundation.com/' },
 ];
 
-const approvedReviews = [
-  // Add real approved reviews here. Only approved: true items display publicly.
-  // Example:
-  // { approved: true, rating: 5, review: 'Alpha Zone Labs made the process clear and helped us move forward with confidence.', reviewerFirstName: 'Jane', reviewerLastInitial: 'D' },
-];
 
 const pages = {
   home: {
@@ -198,13 +197,6 @@ function workPreviewSection() {
   return `<section class="portfolio-section work-showcase-section"><div class="work-showcase-layout"><div class="work-showcase-copy"><p class="eyebrow">Selected work</p><h2>Clearer experiences for real businesses.</h2><p class="section-subtitle">A few examples of websites and digital systems built to improve clarity, trust, and action.</p><a href="${pagePaths.portfolio}" class="cta-btn secondary">View More Work</a></div><div class="work-showcase-slider" aria-label="Selected project screenshots">${slides}</div></div></section>`;
 }
 
-function reviewsSection() {
-  const reviews = approvedReviews.filter((review) => review.approved);
-  const reviewCards = reviews.length
-    ? reviews.map(reviewCard).join('')
-    : `<article class="review-card review-card--empty"><div class="review-stars" aria-label="No approved reviews yet">☆☆☆☆☆</div><p>Approved client reviews will appear here once they are added.</p><strong>Alpha Zone Labs</strong></article>`;
-  return `<section class="reviews-section" aria-labelledby="reviews-heading"><div class="section-header"><p class="eyebrow">Reviews</p><h2 id="reviews-heading">What clients say.</h2><p class="section-subtitle">Approved reviews display here with a star rating, the review, and the reviewer’s first name plus last initial.</p></div><div class="reviews-grid">${reviewCards}</div></section>`;
-}
 
 function reviewCard(review) {
   const rating = Math.max(1, Math.min(5, Number(review.rating) || 5));
@@ -235,7 +227,7 @@ function ctaPanel(title, copy, primaryHref, primaryLabel, secondaryHref, seconda
 }
 
 function contactForm() {
-  return `<form class="basic-contact-form"><label>Business or project name<input type="text" name="businessName" required></label><label>Your name<input type="text" name="name" required></label><label>Email<input type="email" name="email" required></label><label>What do you need help with?<select name="projectType" required><option value="">Choose one</option><option value="website">Website</option><option value="automation">Automation</option><option value="app">App or internal tool</option><option value="strategy">Strategy or system planning</option></select></label><label>What should work better?<textarea name="message" rows="6" required></textarea></label><button type="submit" class="cta-btn primary">Send Project Request</button><p class="form-status" aria-live="polite"></p></form>`;
+  return `<form class="basic-contact-form"><label>Business or project name<input type="text" name="businessName" maxlength="160" required></label><label>Your name<input type="text" name="name" maxlength="120" autocomplete="name" required></label><label>Email<input type="email" name="email" maxlength="254" autocomplete="email" required></label><label>What do you need help with?<select name="projectType" required><option value="">Choose one</option><option value="website">Website</option><option value="automation">Automation</option><option value="app">App or internal tool</option><option value="strategy">Strategy or system planning</option></select></label><label>What should work better?<textarea name="message" rows="6" maxlength="10000" required></textarea></label><label class="visually-hidden" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label><button type="submit" class="cta-btn primary">Send Project Request</button><p class="form-status" role="status" aria-live="polite"></p></form>`;
 }
 
 function initializeFeatures() {
@@ -312,11 +304,31 @@ function initializeFeatures() {
     const projectType = params.get('path');
     const typeField = contactFormElement.querySelector('[name="projectType"]');
     if (projectType && typeField) typeField.value = projectType;
-    contactFormElement.addEventListener('submit', (event) => {
+    contactFormElement.addEventListener('submit', async (event) => {
       event.preventDefault();
       const status = contactFormElement.querySelector('.form-status');
-      status.textContent = 'Thanks. Your request has been received.';
-      contactFormElement.reset();
+      const button = contactFormElement.querySelector('button[type="submit"]');
+      const data = Object.fromEntries(new FormData(contactFormElement));
+      const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8787/api/forms'
+        : '/api/forms';
+      button.disabled = true;
+      status.textContent = 'Sending your request...';
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
+          body: JSON.stringify({ formType: 'project', data, honeypot: data.website, pageUrl: window.location.href })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || 'We could not send your request.');
+        status.textContent = payload.duplicate ? 'This request was already received.' : 'Thanks. Your request has been received.';
+        contactFormElement.reset();
+      } catch (submissionError) {
+        status.textContent = submissionError instanceof Error ? submissionError.message : 'We could not send your request.';
+      } finally {
+        button.disabled = false;
+      }
     });
   }
 }
