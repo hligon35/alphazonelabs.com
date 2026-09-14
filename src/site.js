@@ -202,13 +202,6 @@ function workPreviewSection() {
   return `<section class="portfolio-section work-showcase-section"><div class="work-showcase-layout"><div class="work-showcase-copy"><p class="eyebrow">Selected work</p><h2>Clearer experiences for real businesses.</h2><p class="section-subtitle">A few examples of websites and digital systems built to improve clarity, trust, and action.</p><a href="${pagePaths.portfolio}" class="cta-btn secondary">View More Work</a></div><div class="work-showcase-slider" aria-label="Selected project screenshots">${slides}</div></div></section>`;
 }
 
-function reviewsSection() {
-  const reviews = approvedReviews.filter((review) => review.approved);
-  const reviewCards = reviews.length
-    ? reviews.map(reviewCard).join('')
-    : `<article class="review-card review-card--empty"><div class="review-stars" aria-label="No approved reviews yet">☆☆☆☆☆</div><p>Approved client reviews will appear here once they are added.</p><strong>Alpha Zone Labs</strong></article>`;
-  return `<section class="reviews-section" aria-labelledby="reviews-heading"><div class="section-header"><p class="eyebrow">Reviews</p><h2 id="reviews-heading">What clients say.</h2><p class="section-subtitle">Approved reviews display here with a star rating, the review, and the reviewer’s first name plus last initial.</p></div><div class="reviews-grid">${reviewCards}</div></section>`;
-}
 
 function reviewCard(review) {
   const rating = Math.max(1, Math.min(5, Number(review.rating) || 5));
