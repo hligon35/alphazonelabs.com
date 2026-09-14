@@ -15,6 +15,7 @@ import {
   ReviewListAdmin,
   ReviewListPublished,
   ReviewModerate,
+  ReviewDelete,
   ReviewPublicOptions,
   ReviewSubmit,
   ReviewMedia,
@@ -76,6 +77,7 @@ app.post("/api/reviews/invitations", ReviewCreateInvitation);
 app.get("/api/reviews", ReviewListAdmin);
 app.get("/api/reviews/analytics", ReviewAnalytics);
 app.post("/api/reviews/:id/moderate", ReviewModerate);
+app.delete("/api/reviews/:id", ReviewDelete);
 app.get("/api/reviews/media/:key{.+}", ReviewMedia);
 app.get("/api/reviews/invitation/:token", ReviewGetInvitation);
 app.post("/api/reviews/invitation/:token", ReviewSubmit);
