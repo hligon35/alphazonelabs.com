@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: '/',
   root: 'review-app',
-  publicDir: false,
+  publicDir: resolve(__dirname, 'review-app/public'),
   build: {
     outDir: '../review-dist',
     emptyOutDir: true,
