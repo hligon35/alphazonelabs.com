@@ -4,6 +4,7 @@ import { QuoteSubmit } from "./endpoints/quotes";
 import {
   ReviewAuthConfig,
   ReviewAuthLogout,
+  ReviewLocalDevLogin,
   ReviewAuthSession,
   ReviewGoogleLogin,
 } from "./endpoints/reviewAuth";
@@ -65,6 +66,7 @@ app.post("/api/quotes", QuoteSubmit);
 
 app.get("/api/auth/config", ReviewAuthConfig);
 app.post("/api/auth/google", ReviewGoogleLogin);
+app.post("/api/auth/local-dev", ReviewLocalDevLogin);
 app.get("/api/auth/session", ReviewAuthSession);
 app.post("/api/auth/logout", ReviewAuthLogout);
 

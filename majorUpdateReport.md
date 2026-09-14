@@ -29,6 +29,17 @@
 - Quote pricing is intentionally stored as server-owned zero until the business pricing rules are defined; client-submitted totals are not trusted.
 - Generated deployment directories are tracked by the existing repository workflow and were rebuilt; review the generated diff before committing.
 
+## Deployment update
+
+- Production D1 migration `0002_application_data.sql` applied successfully to `azl-reviews`.
+- Main Pages project `alphazonelabs` deployed at `https://c65cf061.alphazonelabs.pages.dev`.
+- Quote Pages project `azl-quote` deployed at `https://ff56a6d1.azl-quote.pages.dev`.
+- Review Pages project deployed at `https://review.alphazonelabs.com`.
+- Existing production Worker `azl-review` deployed successfully with D1 binding and API routes.
+- Local admin login smoke test returned `200` with an auth cookie.
+- Production review page and auth configuration returned `200`.
+- Production Resend API key is still not configured; email-backed workflows remain blocked until it is added.
+
 ## Required dashboard actions
 
 1. Verify the Resend domain and create the production `RESEND_API_KEY` secret.

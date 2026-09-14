@@ -12,6 +12,8 @@ declare global {
 		REVIEW_SITE_URL?: string;
 		ALLOWED_ORIGINS?: string;
 		ENVIRONMENT?: string;
+		LOCAL_AUTH_BYPASS?: string;
+		LOCAL_ADMIN_EMAIL?: string;
 	}
 }
 

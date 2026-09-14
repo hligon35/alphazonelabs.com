@@ -29,13 +29,29 @@
 
   "env": {
     "production": {
+      "name": "azl-review",
+      "d1_databases": [
+        {
+          "binding": "REVIEWS_DB",
+          "database_name": "azl-reviews",
+          "database_id": "b02d7c1f-de2a-4038-9147-5126ad6cbc5e"
+        }
+      ],
       "routes": [
         { "pattern": "alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" },
         { "pattern": "www.alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" },
         { "pattern": "review.alphazonelabs.com/api/*", "zone_name": "alphazonelabs.com" }
       ],
       "vars": {
-        "ENVIRONMENT": "production"
+        "ENVIRONMENT": "production",
+        "GOOGLE_CLIENT_ID": "163925102971-unugq0eks4833r9t268tmo09ld1ooi9.apps.googleusercontent.com",
+        "ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com,hligon35@gmail.com,hligon@alphazonelabs.com,alphazonelabsllc@gmail.com",
+        "RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
+        "RESEND_FROM_NAME": "Alpha Zone Labs",
+        "REVIEW_SITE_URL": "https://review.alphazonelabs.com",
+        "FORMS_TO_EMAIL": "info@alphazonelabs.com",
+        "FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
+        "ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com"
       }
     },
     "preview": {
@@ -47,7 +63,9 @@
     "development": {
       "workers_dev": true,
       "vars": {
-        "ENVIRONMENT": "development"
+        "ENVIRONMENT": "development",
+        "LOCAL_AUTH_BYPASS": "true",
+        "LOCAL_ADMIN_EMAIL": "local-admin@example.com"
       }
     }
   }

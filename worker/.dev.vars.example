@@ -1,4 +1,6 @@
 ENVIRONMENT=development
+LOCAL_AUTH_BYPASS=true
+LOCAL_ADMIN_EMAIL=local-admin@example.com
 RESEND_API_KEY=re_placeholder
 RESEND_FROM_EMAIL=noreply@example.com
 RESEND_FROM_NAME=Alpha Zone Labs
