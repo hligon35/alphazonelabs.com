@@ -82,6 +82,9 @@ app.post("/api/reviews/invitation/:token", ReviewSubmit);
 app.options("/api/reviews/published", ReviewPublicOptions);
 app.get("/api/reviews/published", ReviewListPublished);
 
+app.get("/admin", (c) => c.redirect("https://review.alphazonelabs.com/"));
+app.get("/admin/*", (c) => c.redirect("https://review.alphazonelabs.com/"));
+
 app.get("/", (c) => c.json({ ok: true, service: "Alpha Zone Labs forms and review authentication" }));
 
 export default app;

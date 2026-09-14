@@ -48,6 +48,14 @@
 			],
 			"routes": [
 				{
+					"pattern": "alphazonelabs.com/admin*",
+					"zone_name": "alphazonelabs.com"
+				},
+				{
+					"pattern": "www.alphazonelabs.com/admin*",
+					"zone_name": "alphazonelabs.com"
+				},
+				{
 					"pattern": "alphazonelabs.com/api/*",
 					"zone_name": "alphazonelabs.com"
 				},

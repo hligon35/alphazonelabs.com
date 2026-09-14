@@ -45,6 +45,7 @@
 - Added the requested reviewer identity row above the review text on public cards.
 - Applied `0003_review_media.sql` and verified all review/application tables exist in production D1.
 - Verified unauthenticated analytics requests return `401` and public review delivery returns `200`.
+- Added and deployed `/admin` and `/admin/*` redirects from the main domain to the authenticated review portal; live smoke test returns `302` to `https://review.alphazonelabs.com/`.
 
 ## Required dashboard actions
 
