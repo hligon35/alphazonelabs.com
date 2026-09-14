@@ -266,6 +266,37 @@ export async function ReviewModerate(c: AppContext) {
   return json(c, { ok: true, id, status: nextStatus });
 }
 
+export async function ReviewDelete(c: AppContext) {
+  const auth = await requireAdmin(c);
+  if (auth.response || !auth.session) return auth.response;
+  const database = db(c);
+  if (!database) return json(c, { error: "REVIEWS_DB is not configured." }, 503);
+
+  const id = clean(c.req.param("id"), 100);
+  const review = await database.prepare("SELECT id, image_key FROM reviews WHERE id = ?")
+    .bind(id)
+    .first<{ id: string; image_key: string | null }>();
+  if (!review) return json(c, { error: "Review not found." }, 404);
+
+  const deletedAt = new Date().toISOString();
+  await database.batch([
+    database.prepare("DELETE FROM reviews WHERE id = ?").bind(id),
+    database.prepare(
+      "INSERT INTO review_audit_log (id, actor_email, action, entity_type, entity_id, created_at) VALUES (?, ?, 'deleted', 'review', ?, ?)",
+    ).bind(crypto.randomUUID(), auth.session.email, id, deletedAt),
+  ]);
+
+  if (review.image_key && media(c)) {
+    try {
+      await media(c)?.delete(review.image_key);
+    } catch {
+      // A deleted review must not be restored because media cleanup was unsuccessful.
+    }
+  }
+
+  return json(c, { ok: true, id, deleted: true });
+}
+
 export async function ReviewGetInvitation(c: AppContext) {
   const database = db(c);
   if (!database) return json(c, { error: "Review service is not configured." }, 503);
