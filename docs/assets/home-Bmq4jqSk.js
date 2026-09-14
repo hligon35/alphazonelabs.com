@@ -1,4 +1,4 @@
-import{r as o}from"./site-BMuVezp7.js";const n="https://review.alphazonelabs.com/api/reviews/published";function r(t=""){return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function l(t){const e=Math.max(1,Math.min(5,Number(t.rating||5)));return`
+import{r as o}from"./site-DrUATrrS.js";const n="https://review.alphazonelabs.com/api/reviews/published";function r(t=""){return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function l(t){const e=Math.max(1,Math.min(5,Number(t.rating||5)));return`
     <article class="published-review-card">
       <p class="published-review-stars" aria-label="${e} out of 5 stars">${"★".repeat(e)}${"☆".repeat(5-e)}</p>
       <blockquote>“${r(t.review_text)}”</blockquote>

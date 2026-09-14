@@ -7,6 +7,9 @@ const brand = {
 };
 
 const quoteUrl = 'https://quote.alphazonelabs.com/';
+const reviewUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5175/'
+  : 'https://review.alphazonelabs.com/';
 
 const pagePaths = {
   home: './index.html',
@@ -25,6 +28,7 @@ const navigation = [
   { key: 'about', label: 'About', href: pagePaths.about },
   { key: 'portfolio', label: 'Work', href: pagePaths.portfolio },
   { key: 'services', label: 'Services', href: pagePaths.services },
+  { key: 'review', label: 'Admin', href: reviewUrl },
 ];
 
 const contactRoutes = {
