@@ -57,7 +57,7 @@ app.use("*", async (c, next) => {
 
   const isReviewAuthApi = c.req.path.startsWith("/api/auth/") || c.req.path.startsWith("/api/reviews");
   const csp = isReviewAuthApi
-    ? "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client https://accounts.google.com; frame-src https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://oauth2.googleapis.com;"
+    ? "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client https://accounts.google.com; frame-src https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; style-src-elem 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://oauth2.googleapis.com;"
     : "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self';";
   c.header("Content-Security-Policy", csp);
 });
