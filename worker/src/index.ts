@@ -84,8 +84,9 @@ app.post("/api/reviews/invitation/:token", ReviewSubmit);
 app.options("/api/reviews/published", ReviewPublicOptions);
 app.get("/api/reviews/published", ReviewListPublished);
 
-app.get("/admin", (c) => c.redirect("https://review.alphazonelabs.com/"));
-app.get("/admin/*", (c) => c.redirect("https://review.alphazonelabs.com/"));
+app.get("/admin.html", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
+app.get("/admin", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
+app.get("/admin/*", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
 
 app.get("/", (c) => c.json({ ok: true, service: "Alpha Zone Labs forms and review authentication" }));
 

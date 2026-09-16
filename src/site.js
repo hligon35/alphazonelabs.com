@@ -9,7 +9,9 @@ const brand = {
 const quoteUrl = 'https://quote.alphazonelabs.com/';
 
 const pagePaths = {
-  home: './index.html',
+  // Use the canonical homepage URL so internal links do not create
+  // duplicate discovery for /index.html.
+  home: '/',
   services: './services.html',
   portfolio: './portfolio.html',
   about: './about.html',

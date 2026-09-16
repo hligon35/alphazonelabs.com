@@ -1,4 +1,17 @@
 User-agent: *
 Allow: /
 
+# These are implementation, administrative, or separate application paths;
+# they are not public marketing pages for the main site.
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /google-apps-script/
+Disallow: /node_modules/
+Disallow: /quote-app/
+Disallow: /quote-dist/
+Disallow: /review-app/
+Disallow: /review-dist/
+Disallow: /sas/
+Disallow: /worker/
+
 Sitemap: https://alphazonelabs.com/sitemap.xml

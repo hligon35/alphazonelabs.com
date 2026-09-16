@@ -1,10 +1,18 @@
 User-agent: *
 Allow: /
 
-# Keep private or generated assets out of normal crawling.
+# Keep private or generated assets out of normal crawling. The public site
+# build is served from /docs on GitHub Pages, while /src is required when the
+# source tree is used as a deployment fallback, so do not block /src.
 Disallow: /node_modules/
-Disallow: /src/
 Disallow: /docs/assets/
+Disallow: /google-apps-script/
+Disallow: /quote-app/
+Disallow: /quote-dist/
+Disallow: /review-app/
+Disallow: /review-dist/
+Disallow: /worker/
+Disallow: /sas/
 
 # AI crawler policy: allow discovery and search references, but do not permit model-training use.
 # Compliant crawlers may use the public pages for search, citations, and answer retrieval.
