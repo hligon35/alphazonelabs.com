@@ -10,7 +10,7 @@
     "build": "vite build",
     "build:quote": "vite build --config vite.quote.config.js",
     "build:review": "vite build --config vite.review.config.js",
-    "deploy:review-worker": "npm install --prefix worker && npm --prefix worker run deploy",
+    "deploy:admin-worker": "npm install --prefix worker && npm --prefix worker run deploy -- --env production",
     "preview": "vite preview",
     "preview:quote": "vite preview --config vite.quote.config.js",
     "preview:review": "vite preview --config vite.review.config.js"

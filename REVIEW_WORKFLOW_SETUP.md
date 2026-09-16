@@ -48,7 +48,7 @@ The configured sender is `info@alphazonelabs.com`. It must be verified in SendGr
 ## 5. Deploy
 
 ```bash
-npx wrangler deploy
+npx wrangler deploy --env production
 ```
 
 Cloudflare Pages should also rebuild the review frontend with:
