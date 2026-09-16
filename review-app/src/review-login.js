@@ -6,8 +6,8 @@ const app = document.querySelector('#app');
 app.innerHTML = `
   <section class="auth-shell" aria-labelledby="portal-title">
     <div class="brand-copy">
-      <p class="eyebrow">Review management</p>
-      <h1 id="portal-title">Alpha Zone Labs Review Portal</h1>
+      <p class="eyebrow">Admin access</p>
+      <h1 id="portal-title">Alpha Zone Labs Admin Portal</h1>
       <p>Sign in with an approved Google account to send review requests and moderate customer submissions.</p>
     </div>
 
@@ -20,7 +20,7 @@ app.innerHTML = `
         <div class="signin-card">
           <p class="eyebrow">Authorized access only</p>
           <h2>Sign in</h2>
-          <p class="signin-intro">Use a Google account that has been added to the portal allowlist.</p>
+          <p class="signin-intro">Use a Google account that has been added to the admin allowlist.</p>
           <div id="google-signin" class="google-signin" aria-live="polite"></div>
           <button id="local-dev-login" type="button" hidden>Use local development login</button>
           <p id="auth-status" class="auth-status" role="status"></p>

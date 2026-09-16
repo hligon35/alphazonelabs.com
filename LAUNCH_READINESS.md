@@ -8,11 +8,11 @@ Apply local D1 migrations with Wrangler after creating a local database. Product
 
 ## Environment and email
 
-`RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_FROM_NAME` are server-only Worker secrets. `FORMS_TO_EMAIL`, `FORMS_DISPLAY_TO_EMAIL`, `AUTH_COOKIE_SECRET`, `GOOGLE_CLIENT_ID`, `ALLOWED_GOOGLE_EMAILS`, `REVIEW_SITE_URL`, and `ALLOWED_ORIGINS` are Worker variables. Configure the Resend sending domain before production deployment. No browser bundle should contain a secret.
+`RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_FROM_NAME` are server-only Worker secrets. `FORMS_TO_EMAIL`, `FORMS_DISPLAY_TO_EMAIL`, `AUTH_COOKIE_SECRET`, `GOOGLE_CLIENT_ID`, `ALLOWED_GOOGLE_EMAILS`, `ADMIN_SITE_URL`, and `ALLOWED_ORIGINS` are Worker variables. Configure the Resend sending domain before production deployment. No browser bundle should contain a secret.
 
 ## Deployment
 
-Build all checked-in Pages artifacts with `npm run build`, `npm run build:quote`, and `npm run build:review`. Deploy the Worker from `worker` with `npm run deploy -- --env production` after applying migrations and setting secrets with Wrangler. Configure Cloudflare Pages or custom domains so the main site, quote site, and review site use the generated directories and the Worker API routes do not overlap with static asset routes.
+Build all checked-in Pages artifacts with `npm run build`, `npm run build:quote`, and `npm run build:review`. Deploy the Worker from `worker` with `npm run deploy -- --env production` after applying migrations and setting secrets with Wrangler. Configure Cloudflare Pages or custom domains so the main site, quote site, and admin site use the generated directories and the Worker API routes do not overlap with static asset routes.
 
 ## Operations
 

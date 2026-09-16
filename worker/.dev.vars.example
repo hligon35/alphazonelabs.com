@@ -9,5 +9,5 @@ FORMS_DISPLAY_TO_EMAIL=owner@example.com
 AUTH_COOKIE_SECRET=replace-with-a-long-random-development-secret
 GOOGLE_CLIENT_ID=
 ALLOWED_GOOGLE_EMAILS=owner@example.com
-REVIEW_SITE_URL=http://localhost:5175
+ADMIN_SITE_URL=http://localhost:5175
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175

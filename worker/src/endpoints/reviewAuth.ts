@@ -159,7 +159,7 @@ export async function ReviewGoogleLogin(c: AppContext) {
 
   const allowed = allowedEmails(env);
   if (!allowed.size || !allowed.has(email)) {
-    return json(c, { error: "This Google account is not authorized for the review portal." }, 403);
+    return json(c, { error: "This Google account is not authorized for the admin portal." }, 403);
   }
 
   const token = await createSession(

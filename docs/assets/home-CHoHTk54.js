@@ -1,4 +1,4 @@
-import{r as n}from"./site-CR_rctgx.js";const o="https://review.alphazonelabs.com/api/reviews/published";function r(e=""){return String(e).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function l(e){const t=Math.max(1,Math.min(5,Number(e.rating||5)));return`
+import{r as n}from"./site-CR_rctgx.js";const o="https://admin.alphazonelabs.com/api/reviews/published";function r(e=""){return String(e).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function l(e){const t=Math.max(1,Math.min(5,Number(e.rating||5)));return`
     <article class="published-review-card">
       <div class="published-review-card__identity">${e.image_url?`<img src="${r(e.image_url)}" alt="" loading="lazy">`:'<span class="published-review-card__avatar" aria-hidden="true"></span>'}<strong>${r(e.customer_name||"Alpha Zone Labs customer")}</strong></div>
       <p class="published-review-stars" aria-label="${t} out of 5 stars">${"★".repeat(t)}${"☆".repeat(5-t)}</p>

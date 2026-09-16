@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "azl-review",
+	"name": "azl-admin",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-01-28",
 	"workers_dev": true,
@@ -25,14 +25,14 @@
 		"ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com, hligon35@gmail.com, hligon@alphazonelabs.com, alphazonelabsllc@gmail.com",
 		"RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
 		"RESEND_FROM_NAME": "Alpha Zone Labs",
-		"REVIEW_SITE_URL": "https://review.alphazonelabs.com",
+		"ADMIN_SITE_URL": "https://admin.alphazonelabs.com",
 		"FORMS_TO_EMAIL": "info@alphazonelabs.com",
 		"FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
-		"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com,http://localhost:5173,http://127.0.0.1:5173,https://hligon35.github.io"
+		"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://admin.alphazonelabs.com,http://localhost:5173,http://127.0.0.1:5173,https://hligon35.github.io"
 	},
 	"env": {
 		"production": {
-			"name": "azl-review",
+			"name": "azl-admin",
 			"d1_databases": [
 				{
 					"binding": "REVIEWS_DB",
@@ -64,7 +64,7 @@
 					"zone_name": "alphazonelabs.com"
 				},
 				{
-					"pattern": "review.alphazonelabs.com/api/*",
+					"pattern": "admin.alphazonelabs.com/api/*",
 					"zone_name": "alphazonelabs.com"
 				}
 			],
@@ -74,10 +74,10 @@
 				"ALLOWED_GOOGLE_EMAILS": "hligon@getsparqd.com,hligon35@gmail.com,hligon@alphazonelabs.com,alphazonelabsllc@gmail.com",
 				"RESEND_FROM_EMAIL": "noreply@alphazonelabs.com",
 				"RESEND_FROM_NAME": "Alpha Zone Labs",
-				"REVIEW_SITE_URL": "https://review.alphazonelabs.com",
+				"ADMIN_SITE_URL": "https://admin.alphazonelabs.com",
 				"FORMS_TO_EMAIL": "info@alphazonelabs.com",
 				"FORMS_DISPLAY_TO_EMAIL": "info@alphazonelabs.com",
-				"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://review.alphazonelabs.com"
+				"ALLOWED_ORIGINS": "https://alphazonelabs.com,https://www.alphazonelabs.com,https://admin.alphazonelabs.com"
 			}
 		},
 		"preview": {

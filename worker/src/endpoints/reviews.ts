@@ -6,7 +6,7 @@ type ReviewEnv = Env & {
   REVIEWS_MEDIA?: R2Bucket;
   SENDGRID_API_KEY?: string;
   REVIEW_FROM_EMAIL?: string;
-  REVIEW_SITE_URL?: string;
+  ADMIN_SITE_URL?: string;
   REVIEW_LOGO_URL?: string;
   ALLOWED_ORIGINS?: string;
 };
@@ -98,7 +98,7 @@ async function requireAdmin(c: AppContext) {
 async function sendReviewEmail(env: ReviewEnv, invitation: InvitationRow): Promise<void> {
   if (!env.SENDGRID_API_KEY) throw new Error("SENDGRID_API_KEY is not configured.");
   const from = env.REVIEW_FROM_EMAIL || "info@alphazonelabs.com";
-  const siteUrl = (env.REVIEW_SITE_URL || "https://review.alphazonelabs.com").replace(/\/$/, "");
+  const siteUrl = (env.ADMIN_SITE_URL || "https://admin.alphazonelabs.com").replace(/\/$/, "");
   const logoUrl = env.REVIEW_LOGO_URL || "https://raw.githubusercontent.com/hligon35/hldesignedit.com/main/alpha-zone-labs-logo.png";
   const reviewUrl = `${siteUrl}/submit.html?token=${encodeURIComponent(invitation.token)}`;
   const firstName = invitation.customer_name.split(/\s+/)[0] || "there";

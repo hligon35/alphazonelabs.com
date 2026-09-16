@@ -62,7 +62,7 @@ The main Alpha Zone Labs site must be rebuilt and deployed for approved reviews 
 
 ## 6. Test the complete workflow
 
-1. Sign in at `https://review.alphazonelabs.com`.
+1. Sign in at `https://admin.alphazonelabs.com`.
 2. Send a review request from the dashboard.
 3. Open the unique link from the email.
 4. Submit a rating and review.

@@ -23,12 +23,12 @@ import {
 
 const app = new Hono<{ Bindings: Env }>();
 
-const REVIEW_ORIGIN = "https://review.alphazonelabs.com";
+const ADMIN_ORIGIN = "https://admin.alphazonelabs.com";
 const MAIN_ORIGIN = "https://alphazonelabs.com";
 const LOCAL_ORIGINS = new Set(["http://localhost:5173", "http://127.0.0.1:5173"]);
 
 function isAllowedOrigin(origin: string | null) {
-  return origin === REVIEW_ORIGIN || origin === MAIN_ORIGIN || LOCAL_ORIGINS.has(origin || "");
+  return origin === ADMIN_ORIGIN || origin === MAIN_ORIGIN || LOCAL_ORIGINS.has(origin || "");
 }
 
 function addCorsHeaders(c: any) {
@@ -56,8 +56,8 @@ app.use("*", async (c, next) => {
   c.header("X-Frame-Options", "DENY");
   c.header("Referrer-Policy", "strict-origin-when-cross-origin");
 
-  const isReviewAuthApi = c.req.path.startsWith("/api/auth/") || c.req.path.startsWith("/api/reviews");
-  const csp = isReviewAuthApi
+  const isAdminAuthApi = c.req.path.startsWith("/api/auth/") || c.req.path.startsWith("/api/reviews");
+  const csp = isAdminAuthApi
     ? "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client https://accounts.google.com; frame-src https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; style-src-elem 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://oauth2.googleapis.com;"
     : "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self';";
   c.header("Content-Security-Policy", csp);
@@ -84,9 +84,9 @@ app.post("/api/reviews/invitation/:token", ReviewSubmit);
 app.options("/api/reviews/published", ReviewPublicOptions);
 app.get("/api/reviews/published", ReviewListPublished);
 
-app.get("/admin.html", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
-app.get("/admin", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
-app.get("/admin/*", (c) => c.redirect("https://review.alphazonelabs.com/", 301));
+app.get("/admin.html", (c) => c.redirect(`${ADMIN_ORIGIN}/`, 301));
+app.get("/admin", (c) => c.redirect(`${ADMIN_ORIGIN}/`, 301));
+app.get("/admin/*", (c) => c.redirect(`${ADMIN_ORIGIN}/`, 301));
 
 app.get("/", (c) => c.json({ ok: true, service: "Alpha Zone Labs forms and review authentication" }));
 

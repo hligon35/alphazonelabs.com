@@ -97,7 +97,7 @@ function render(session) {
     <header class="portal-header">
       <a href="/dashboard.html" class="portal-brand">
         <img src="${logoUrl}" alt="Alpha Zone Labs" />
-        <span>Review Portal</span>
+        <span>Admin Portal</span>
       </a>
       <nav class="portal-nav" aria-label="Admin sections">
         <a class="nav-button is-active" href="/dashboard.html">Reviews</a>

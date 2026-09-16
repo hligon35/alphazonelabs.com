@@ -34,8 +34,8 @@
 - Production D1 migration `0002_application_data.sql` applied successfully to `azl-reviews`.
 - Main Pages project `alphazonelabs` deployed at `https://c65cf061.alphazonelabs.pages.dev`.
 - Quote Pages project `azl-quote` deployed at `https://ff56a6d1.azl-quote.pages.dev`.
-- Review Pages project deployed at `https://review.alphazonelabs.com`.
-- Existing production Worker `azl-review` deployed successfully with D1 binding and API routes.
+- Admin Pages project deployed at `https://admin.alphazonelabs.com`.
+- Existing production Worker `azl-admin` deployed successfully with D1 binding and API routes.
 - Local admin login smoke test returned `200` with an auth cookie.
 - Production review page and auth configuration returned `200`.
 - Production Resend API key is still not configured; email-backed workflows remain blocked until it is added.
@@ -45,7 +45,7 @@
 - Added the requested reviewer identity row above the review text on public cards.
 - Applied `0003_review_media.sql` and verified all review/application tables exist in production D1.
 - Verified unauthenticated analytics requests return `401` and public review delivery returns `200`.
-- Added and deployed `/admin` and `/admin/*` redirects from the main domain to the authenticated review portal; live smoke test returns `302` to `https://review.alphazonelabs.com/`.
+- Added and deployed `/admin` and `/admin/*` redirects from the main domain to the authenticated admin portal; live smoke test returns `302` to `https://admin.alphazonelabs.com/`.
 
 ## Required dashboard actions
 

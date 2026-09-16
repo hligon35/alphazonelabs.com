@@ -27,7 +27,7 @@ import{l as u}from"./alpha-zone-labs-logo-D7k3N0Cj.js";const p=document.querySel
     <header class="portal-header">
       <a href="/dashboard.html" class="portal-brand">
         <img src="${u}" alt="Alpha Zone Labs" />
-        <span>Review Portal</span>
+        <span>Admin Portal</span>
       </a>
       <nav class="portal-nav" aria-label="Admin sections">
         <a class="nav-button is-active" href="/dashboard.html">Reviews</a>

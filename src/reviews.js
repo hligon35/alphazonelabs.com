@@ -1,4 +1,4 @@
-const REVIEWS_ENDPOINT = 'https://review.alphazonelabs.com/api/reviews/published';
+const REVIEWS_ENDPOINT = 'https://admin.alphazonelabs.com/api/reviews/published';
 
 function escapeHtml(value = '') {
   return String(value)

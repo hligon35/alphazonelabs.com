@@ -1,6 +1,6 @@
-# Alpha Zone Labs Review Portal
+# Alpha Zone Labs Admin Portal
 
-The review portal is designed for `https://review.alphazonelabs.com` and uses Google Identity Services with server-side verification in the existing Cloudflare Worker.
+The admin portal is designed for `https://admin.alphazonelabs.com` and uses Google Identity Services with server-side verification in the existing Cloudflare Worker.
 
 ## Frontend deployment
 
@@ -9,13 +9,13 @@ Create a Cloudflare Pages project from this repository with:
 - Build command: `npm run build:review`
 - Build output directory: `review-dist`
 - Root directory: repository root
-- Custom domain: `review.alphazonelabs.com`
+- Custom domain: `admin.alphazonelabs.com`
 
 ## Google OAuth configuration
 
 Create a Google OAuth 2.0 Web application client and add:
 
-- Authorized JavaScript origin: `https://review.alphazonelabs.com`
+- Authorized JavaScript origin: `https://admin.alphazonelabs.com`
 
 The Google client ID is public and must be configured on the Worker as `GOOGLE_CLIENT_ID`.
 
@@ -34,9 +34,9 @@ cd worker
 npx wrangler secret put AUTH_COOKIE_SECRET
 ```
 
-Route these paths on the review subdomain to the Worker:
+Route these paths on the admin subdomain to the Worker:
 
-- `review.alphazonelabs.com/api/auth/*`
+- `admin.alphazonelabs.com/api/auth/*`
 
 The Pages deployment serves the login and dashboard pages. The Worker route handles Google verification and secure sessions.
 

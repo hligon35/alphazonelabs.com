@@ -12,7 +12,7 @@ interface __BaseEnv_Env {
     AUTH_COOKIE_SECRET: string;
     GOOGLE_CLIENT_ID: string;
     ALLOWED_GOOGLE_EMAILS: string;
-    REVIEW_SITE_URL: string;
+    ADMIN_SITE_URL: string;
     ALLOWED_ORIGINS: string;
     ENVIRONMENT: string;
 }
